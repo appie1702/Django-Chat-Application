@@ -6,6 +6,7 @@ from .forms import LoginForm, RegisterForm, JoinRoomForm, CreateRoomForm
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 User = get_user_model()
 
@@ -26,7 +27,7 @@ def home(request):
                 password = form1.cleaned_data['password']
                 qs = Room.objects.filter(name=room)
                 if qs.exists():
-                    messages.error("This Room Name is already exists.")
+                    messages.error(request, "This Room Name is already exists.")
                 else:
                     room_space = Room.objects.create(name=room, user=request.user, password=password)
                     room_space.save()
@@ -72,7 +73,8 @@ def send(request):
     room_id = request.POST['room_id']
     message = request.POST['message']
     username = request.POST['username']
-    new_message = Message(data=message, user=User.objects.get(username=username), username=username,
+    new_message = Message(data=message, date_time=datetime.now(), user=User.objects.get(username=username),
+                          username=username,
                           room=Room.objects.get(id=room_id))
     new_message.save()
     return HttpResponse('Message sent succesfully')
@@ -82,6 +84,21 @@ def getmessages(request, room):
     room_details = Room.objects.filter(name=room).first()
     messages = Message.objects.filter(room=room_details)
     return JsonResponse({"messages": list(messages.values())})
+
+
+def delete_room(request, room):
+    room_object = Room.objects.filter(name=room).first()
+    if room:
+        if room_object.user == request.user:
+            room_object.delete()
+            messages.success(request, "Room successfully deleted!!")
+            return redirect("/home")
+        else:
+            messages.error(request, "As you are not the admin of this room,You are not allowed to delete this room.")
+            return redirect("/room/" + room)
+    else:
+        messages.error(request, "Something went wrong. Try after sometime.")
+        return redirect("/room/" + room)
 
 
 def register_view(request):
