@@ -149,7 +149,7 @@ setInterval(function(){
     </form>
 </div>
 <div class="container">
-{% if room_details.user.username == username %}
+{% if room_details.admin.username == username %}
     <a type="button" href="/deleteroom/{{room}}" class="btn btn-primary">Delete Room</a>
     {% endif %}
 {%endblock%}

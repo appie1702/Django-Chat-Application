@@ -8,7 +8,7 @@ User = get_user_model()
 # Create your models here.
 class Room(models.Model):
     name = models.CharField(max_length=1000, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
+    admin = models.ForeignKey(User, on_delete=models.CASCADE, default=None, null=True)
     password = models.CharField(max_length=300000, default=None, null=True)
     objects = models.Manager()
 

@@ -29,7 +29,7 @@ def home(request):
                 if qs.exists():
                     messages.error(request, "This Room Name is already exists.")
                 else:
-                    room_space = Room.objects.create(name=room, user=request.user, password=password)
+                    room_space = Room.objects.create(name=room, admin=request.user, password=password)
                     room_space.save()
                     url = '/room/' + room
                     return HttpResponseRedirect(url)
@@ -89,7 +89,7 @@ def getmessages(request, room):
 def delete_room(request, room):
     room_object = Room.objects.filter(name=room).first()
     if room:
-        if room_object.user == request.user:
+        if room_object.admin == request.user:
             room_object.delete()
             messages.success(request, "Room successfully deleted!!")
             return redirect("/home")
