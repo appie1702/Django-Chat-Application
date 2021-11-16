@@ -106,7 +106,12 @@ def register_view(request):
     if form.is_valid():
         username = form.cleaned_data.get("username")
         email = form.cleaned_data.get("email")
+        password1 = form.cleaned_data.get("password1")
         password2 = form.cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            messages.error(request, "Passwords are mismatched.Enter the correct password.")
+            return redirect('register')
 
         try:
             user = User.objects.create_user(username=username, email=email, password=password2)

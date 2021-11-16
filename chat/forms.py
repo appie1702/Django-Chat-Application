@@ -104,7 +104,7 @@ class RegisterForm(forms.Form):
         qs = User.objects.filter(username__iexact=username)
 
         if qs.exists():
-            raise forms.ValidationError("This is an invalid username.Please pick another one.")
+            raise forms.ValidationError("This username already exists.Please pick another one.")
         return username
 
     def clean_email(self):
@@ -115,12 +115,12 @@ class RegisterForm(forms.Form):
             raise forms.ValidationError("This email is already exists.")
         return email
 
-    def clean_password(self):
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords are mismatched")
-        return password2
+    #def clean_password(self):
+        #password1 = self.cleaned_data.get("password1")
+        #password2 = self.cleaned_data.get("password2")
+        #if password1 and password2 and password1 != password2:
+        #    raise forms.ValidationError("Passwords are mismatched")
+        #return password2
 
 
 class LoginForm(forms.Form):
