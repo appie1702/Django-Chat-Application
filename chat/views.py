@@ -1,5 +1,7 @@
+import uuid
+
 from django.shortcuts import render, redirect
-from chat.models import Room, Message
+from chat.models import Room, Message, Profile
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, get_user_model
 from .forms import LoginForm, RegisterForm, JoinRoomForm, CreateRoomForm
@@ -118,6 +120,8 @@ def register_view(request):
         except:
             user = None
         if user != None:
+            profile_obj=Profile.objects.create(user=user,auth_token=str(uuid.uuid4()))
+            profile_obj.save
             login(request, user)
             messages.success(request, "You have been successfully logged in.")
             return redirect('/home')

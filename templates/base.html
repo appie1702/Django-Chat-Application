@@ -116,12 +116,14 @@
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
-        <strong>{{message.tags}}!</strong><span class="mx-2">{{message}}</span>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+    <li>
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+            <strong>{{message.tags}}!</strong><span class="mx-2">{{message}}</span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -145,6 +147,7 @@
         background-color: #212121;
         color: white;
       }
+
 
 
 
