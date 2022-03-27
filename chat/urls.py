@@ -10,5 +10,8 @@ urlpatterns = [
     path('login', views.login_view, name='login'),
     path('register', views.register_view, name='register'),
     path('logout', views.logout_view, name='logout'),
-    path('deleteroom/<str:room>', views.delete_room, name='deleteroom')
+    path('deleteroom/<str:room>', views.delete_room, name='deleteroom'),
+    path('token',views.token_view, name='token'),
+    path('verify/<auth_token>',views.verify_email, name='verify'),
+    path('error',views.error_view, name='error')
 ]

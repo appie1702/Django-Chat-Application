@@ -1,5 +1,5 @@
 import uuid
-
+from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
 from chat.models import Room, Message, Profile
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -9,6 +9,8 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from django.conf import settings
+from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -120,15 +122,57 @@ def register_view(request):
         except:
             user = None
         if user != None:
-            profile_obj=Profile.objects.create(user=user,auth_token=str(uuid.uuid4()))
-            profile_obj.save
-            login(request, user)
-            messages.success(request, "You have been successfully logged in.")
-            return redirect('/home')
+            auth_token = str(uuid.uuid4())
+            profile_obj = Profile.objects.create(user=user, auth_token=auth_token)
+            profile_obj.save()
+            sending_mail_after_registration(email, auth_token)
+            return redirect('token')
+            # return HttpResponse("Verification mail has been sent to your email id.")
+            # login(request, user)
+            # messages.success(request, "You have been successfully logged in.")
+            # return redirect('/home')
         else:
             request.session['register_error'] = 1
             messages.error(request, "Something went wrong.Retry again after sometime.")
     return render(request, "registration_page.html", {"form": form})
+
+
+def sending_mail_after_registration(email, token):
+    subject = "Verification of your email id for using AppieChat application"
+    # current_site = get_current_site(request)
+    message = render_to_string('email_template.html', {
+        # 'domain': current_site.domain,
+        'token': token
+    })
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, email_from, recipient_list)
+
+
+def verify_email(request, auth_token):
+    try:
+        profile_obj = Profile.objects.filter(auth_token=auth_token).first()
+        if profile_obj:
+            if profile_obj.is_verified:
+                messages.success(request, "Your account is already verified")
+                return redirect('login')
+            profile_obj.is_verified = True
+            messages.success(request, "Your account has been verified.")
+            profile_obj.save()
+            return redirect('login')
+        else:
+            return redirect('error')
+    except Exception as e:
+        print(e)
+        return ('register')
+
+
+def error_view(request):
+    return render(request, 'error.html')
+
+
+def token_view(request):
+    return render(request, 'token.html')
 
 
 def login_view(request):
@@ -139,10 +183,18 @@ def login_view(request):
             password = form.cleaned_data.get("password")
             user = authenticate(request, username=username, password=password)
             if user != None:
-
-                login(request, user)
-                messages.success(request, "You have been successfully logged in.")
-                return redirect('/home')
+                try:
+                    profile_obj = Profile.objects.filter(user=user)[0]
+                    if not profile_obj.is_verified:
+                        messages.error(request,
+                                       "Your account is not verified.Please verify it through your gmail acount.")
+                        return redirect('login')
+                    login(request, user)
+                    messages.success(request, "You have been successfully logged in.")
+                    return redirect('/home')
+                except:
+                    messages.error(request, "Your account is not verified.Please verify it through your gmail acount.")
+                    return redirect('login')
             else:
                 request.session['invalid_user'] = 1
                 messages.error(request, "username or password is incorrect")

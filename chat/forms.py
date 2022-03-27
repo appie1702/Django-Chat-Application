@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from .models import Room, Message
 
-User=get_user_model()
+User = get_user_model()
 
 
 class JoinRoomForm(forms.Form):
@@ -32,7 +32,7 @@ class JoinRoomForm(forms.Form):
         try:
             qs = Room.objects.get(name=room)
         except:
-            qs=None
+            qs = None
         if qs and not (qs.password == password):
             raise forms.ValidationError("Password is incorrect")
         return password
@@ -66,7 +66,8 @@ class RegisterForm(forms.Form):
                                widget=forms.TextInput(
                                    attrs={
                                        "class": "form-control",
-                                       "placeholder": "Username"
+                                       "placeholder": "Username",
+                                       "id": "username"
                                    }
                                )
                                )
@@ -74,7 +75,8 @@ class RegisterForm(forms.Form):
     email = forms.EmailField(widget=forms.TextInput(
         attrs={
             "class": "form-control",
-            "placeholder": "Email Address"
+            "placeholder": "Email Address",
+            "id": "email_address"
         }
     ), required=True)
 
@@ -115,12 +117,12 @@ class RegisterForm(forms.Form):
             raise forms.ValidationError("This email is already exists.")
         return email
 
-    #def clean_password(self):
-        #password1 = self.cleaned_data.get("password1")
-        #password2 = self.cleaned_data.get("password2")
-        #if password1 and password2 and password1 != password2:
-        #    raise forms.ValidationError("Passwords are mismatched")
-        #return password2
+    # def clean_password(self):
+    # password1 = self.cleaned_data.get("password1")
+    # password2 = self.cleaned_data.get("password2")
+    # if password1 and password2 and password1 != password2:
+    #    raise forms.ValidationError("Passwords are mismatched")
+    # return password2
 
 
 class LoginForm(forms.Form):
@@ -154,10 +156,13 @@ class LoginForm(forms.Form):
     def clean_password(self):
         username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
-        qs = User.objects.get(username__iexact=username)
-        correct = qs.check_password(password)
-        if not correct:
-            raise forms.ValidationError("password is incorrect")
+        try:
+            qs = User.objects.get(username__iexact=username)
+            correct = qs.check_password(password)
+            if not correct:
+                raise forms.ValidationError("password is incorrect")
+        except:
+            raise forms.ValidationError("username is incorrect")
         return password
 
     def __str__(self):
